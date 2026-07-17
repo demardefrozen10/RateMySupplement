@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Lock, X, Plus, Trash2, Edit } from "lucide-react";
 import useFetch from "../hooks/useFetch";
+import type { Brand } from "../types/Brand";
 import type { Supplement } from "../types/Supplement";
 import type { Review } from "../types/Review";
 import type { Tag } from "../types/Tag";
@@ -23,6 +24,7 @@ export default function ApprovePage() {
     const [password, setPassword] = useState("");
     const [authError, setAuthError] = useState(false);
     
+    const [brands, setBrands] = useState<Brand[]>([]);
     const [supplements, setSupplements] = useState<Supplement[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
@@ -55,12 +57,18 @@ export default function ApprovePage() {
                 setTimeout(() => setError(false), 3000);
                 return [];
             }),
+            get("brand/getNotApprovedBrands").catch(() => {
+                setError(true);
+                setTimeout(() => setError(false), 3000);
+                return [];
+            }),
             get("tag/all").catch(() => {
                 return [];
             })
-        ]).then(([reviewsData, supplementsData, tagsData]) => {
+        ]).then(([reviewsData, supplementsData, brandsData, tagsData]) => {
             setReviews(reviewsData || []);
             setSupplements(supplementsData || []);
+            setBrands(brandsData || []);
             setAvailableTags(tagsData || []);
             setLoading(false);
         });
@@ -81,6 +89,17 @@ export default function ApprovePage() {
         patch(`supplement/approveSupplement?supplementId=${supplementId}`)
             .then(() => {
                 setSupplements(prev => prev.filter(s => s.id !== supplementId));
+            })
+            .catch(() => {
+                setError(true);
+                setTimeout(() => setError(false), 3000);
+            });
+    };
+
+    const handleApproveBrand = (brandId: number) => {
+        patch(`brand/approveBrand?brandId=${brandId}`)
+            .then(() => {
+                setBrands(prev => prev.filter(brand => brand.id !== brandId));
             })
             .catch(() => {
                 setError(true);
@@ -255,10 +274,62 @@ export default function ApprovePage() {
                 <div className="max-w-7xl mx-auto px-4 py-12">
                     <div className="mb-8">
                         <h1 className="text-4xl font-bold text-gray-800 mb-2">Approval Dashboard</h1>
-                        <p className="text-gray-600">Review and approve pending supplements and reviews.</p>
+                        <p className="text-gray-600">Review and approve pending brands, supplements, and reviews.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                                Pending Brands ({brands.length})
+                            </h2>
+                            {brands.length === 0 ? (
+                                <p className="text-gray-500 text-center py-8">No pending brands</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {brands.map((brand) => (
+                                        <div key={brand.id} className="border-2 border-gray-200 rounded-lg p-4 hover:border-emerald-300 transition-colors">
+                                            <div className="flex items-start gap-4">
+                                                {brand.imageUrl && (
+                                                    <img
+                                                        src={brand.imageUrl}
+                                                        alt={brand.brandName}
+                                                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                                                    />
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-gray-800 truncate">{brand.brandName}</h3>
+                                                    {brand.country && (
+                                                        <p className="text-sm text-gray-600 truncate">Country: {brand.country}</p>
+                                                    )}
+                                                    {brand.websiteUrl && (
+                                                        <a
+                                                            href={brand.websiteUrl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline truncate block"
+                                                        >
+                                                            {brand.websiteUrl}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-4">
+                                                <button
+                                                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer"
+                                                    onClick={() => handleApproveBrand(brand.id)}
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer">
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">
                                 Pending Supplements ({supplements.length})
@@ -327,24 +398,46 @@ export default function ApprovePage() {
                                                     <span className="text-yellow-500 text-sm">{"★".repeat(Math.floor(review.rating))}</span>
                                                     <span className="text-xs text-gray-500">{review.rating}/5</span>
                                                 </div>
-                                                <p className="text-xs text-emerald-600 font-semibold mb-1">
-                                                    Supplement: {(review as any).supplementName || "N/A"}
-                                                </p>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    {review.supplementImageUrl && (
+                                                        <img
+                                                            src={review.supplementImageUrl}
+                                                            alt={review.supplementName}
+                                                            className="w-10 h-10 object-cover rounded border border-gray-200"
+                                                        />
+                                                    )}
+                                                    <p className="text-xs text-emerald-600 font-semibold">
+                                                        Supplement: {review.supplementName || "N/A"}
+                                                    </p>
+                                                </div>
                                                 {review.variant && (
                                                     <p className="text-xs text-gray-600">Variant: {review.variant}</p>
                                                 )}
                                             </div>
                                             <p className="text-gray-700 text-sm mb-3 line-clamp-3">{review.comment}</p>
                                             {review.imageUrls && review.imageUrls.length > 0 && (
-                                                <div className="flex gap-2 mb-3 overflow-x-auto">
+                                                <div className="mb-3">
+                                                    <p className="text-xs font-semibold text-gray-600 mb-1">Review images</p>
+                                                    <div className="flex gap-2 overflow-x-auto">
                                                     {review.imageUrls.slice(0, 3).map((url, idx) => (
                                                         <img 
                                                             key={idx}
                                                             src={url} 
                                                             alt={`Review ${idx + 1}`}
-                                                            className="w-12 h-12 object-cover rounded flex-shrink-0"
+                                                            className="w-20 h-20 object-cover rounded border border-gray-200 flex-shrink-0"
                                                         />
                                                     ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {review.purchaseImageUrl && (
+                                                <div className="mb-3">
+                                                    <p className="text-xs font-semibold text-gray-600 mb-1">Receipt image</p>
+                                                    <img
+                                                        src={review.purchaseImageUrl}
+                                                        alt="Receipt for review verification"
+                                                        className="w-32 h-20 object-cover rounded border border-gray-200"
+                                                    />
                                                 </div>
                                             )}
                                             <div className="flex gap-2">

@@ -14,6 +14,11 @@ public class ReadReviewMapper {
         readReview.setRating(review.getRating());
         readReview.setComment(review.getComment());
         readReview.setImageUrls(review.getImageUrls());
+        readReview.setPurchaseImageUrl(review.getPurchaseImageUrl());
+        readReview.setSupplementName(review.getSupplement().getSupplementName());
+        if (review.getSupplement().getImageUrl() != null && !review.getSupplement().getImageUrl().isEmpty()) {
+            readReview.setSupplementImageUrl(review.getSupplement().getImageUrl().getFirst());
+        }
         readReview.setCreatedAt(review.getCreatedAt());
         readReview.setVariant(review.getVariant());
 

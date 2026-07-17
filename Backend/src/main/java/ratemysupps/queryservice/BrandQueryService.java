@@ -36,6 +36,11 @@ public class BrandQueryService implements IBrandQueryService {
     }
 
     @Override
+    public List<ReadBrand> getNotApprovedBrands() {
+        return brandRepo.findByIsVerifiedFalse().stream().map(mapper::fromEntity).toList();
+    }
+
+    @Override
     public List<Brand> getAllBrands() {
         return brandRepo.findAll();
     }

@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="760" viewBox="0 0 2400 760">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .table { fill: #ffffff; stroke: #263238; stroke-width: 2; rx: 8; }
+      .header { fill: #0f766e; }
+      .join-header { fill: #475569; }
+      .header-text { fill: #ffffff; font: 700 18px Arial, sans-serif; }
+      .field { fill: #111827; font: 14px Arial, sans-serif; }
+      .key { fill: #b45309; font: 700 14px Arial, sans-serif; }
+      .relation { stroke: #374151; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .label { fill: #374151; font: 13px Arial, sans-serif; }
+      .caption { fill: #475569; font: 14px Arial, sans-serif; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="2400" height="760"/>
+  <text x="40" y="38" fill="#111827" font-family="Arial, sans-serif" font-size="28" font-weight="700">RateMySupp Entity Relationship Diagram</text>
+  <text x="40" y="64" class="caption">Each entity is placed in its own column. UK = unique key, FK = foreign key. StringArray represents Java List&lt;String&gt; fields.</text>
+
+  <g transform="translate(40 130)">
+    <rect class="table" width="310" height="330"/>
+    <rect class="header" width="310" height="42" rx="8"/>
+    <text class="header-text" x="16" y="27">BRAND</text>
+    <text class="key" x="16" y="72">PK id : Long</text>
+    <text class="key" x="16" y="98">UK brandName : String</text>
+    <text class="field" x="16" y="124">description : String</text>
+    <text class="key" x="16" y="150">UK websiteUrl : String</text>
+    <text class="key" x="16" y="176">UK imageUrl : String</text>
+    <text class="field" x="16" y="202">country : String</text>
+    <text class="field" x="16" y="228">createdAt : LocalDateTime</text>
+    <text class="field" x="16" y="254">averageRating : Double</text>
+    <text class="field" x="16" y="280">totalReviews : Integer</text>
+    <text class="field" x="16" y="306">isVerified : boolean</text>
+  </g>
+
+  <g transform="translate(430 130)">
+    <rect class="table" width="290" height="130"/>
+    <rect class="header" width="290" height="42" rx="8"/>
+    <text class="header-text" x="16" y="27">CATEGORY</text>
+    <text class="key" x="16" y="72">PK id : Long</text>
+    <text class="key" x="16" y="98">UK name : String</text>
+  </g>
+
+  <g transform="translate(800 130)">
+    <rect class="table" width="340" height="430"/>
+    <rect class="header" width="340" height="42" rx="8"/>
+    <text class="header-text" x="16" y="27">SUPPLEMENT</text>
+    <text class="key" x="16" y="72">PK id : Long</text>
+    <text class="key" x="16" y="98">FK brand_id : Long</text>
+    <text class="key" x="16" y="124">FK category_id : Long</text>
+    <text class="field" x="16" y="150">supplementName : String</text>
+    <text class="field" x="16" y="176">averageRating : Double</text>
+    <text class="field" x="16" y="202">totalReviews : Integer</text>
+    <text class="field" x="16" y="228">description : String</text>
+    <text class="field" x="16" y="254">isVerified : boolean</text>
+    <text class="field" x="16" y="280">createdAt : LocalDateTime</text>
+    <text class="field" x="16" y="306">imageUrl : StringArray</text>
+    <text class="field" x="16" y="332">servingSizes : StringArray</text>
+    <text class="field" x="16" y="358">websiteUrl : String</text>
+    <text class="field" x="16" y="384">variants : StringArray</text>
+  </g>
+
+  <g transform="translate(1220 130)">
+    <rect class="table" width="330" height="330"/>
+    <rect class="header" width="330" height="42" rx="8"/>
+    <text class="header-text" x="16" y="27">REVIEW</text>
+    <text class="key" x="16" y="72">PK id : Long</text>
+    <text class="key" x="16" y="98">FK supplement_id : Long</text>
+    <text class="field" x="16" y="124">username : String</text>
+    <text class="field" x="16" y="150">rating : double</text>
+    <text class="field" x="16" y="176">comment : String</text>
+    <text class="field" x="16" y="202">isVerified : boolean</text>
+    <text class="field" x="16" y="228">imageUrls : StringArray</text>
+    <text class="field" x="16" y="254">purchaseImageUrl : String</text>
+    <text class="field" x="16" y="280">createdAt : LocalDateTime</text>
+    <text class="field" x="16" y="306">variant : String</text>
+  </g>
+
+  <g transform="translate(1630 130)">
+    <rect class="table" width="300" height="130"/>
+    <rect class="join-header" width="300" height="42" rx="8"/>
+    <text class="header-text" x="16" y="27">SUPPLEMENT_TAG</text>
+    <text class="key" x="16" y="72">FK supplement_id : Long</text>
+    <text class="key" x="16" y="98">FK tag_id : Long</text>
+  </g>
+
+  <g transform="translate(2010 130)">
+    <rect class="table" width="290" height="130"/>
+    <rect class="header" width="290" height="42" rx="8"/>
+    <text class="header-text" x="16" y="27">TAG</text>
+    <text class="key" x="16" y="72">PK id : Long</text>
+    <text class="key" x="16" y="98">UK name : String</text>
+  </g>
+
+  <path class="relation" d="M350 285 C500 285 650 285 800 285"/>
+  <text class="label" x="505" y="270">1 brand has many supplements</text>
+
+  <path class="relation" d="M720 195 C750 195 770 220 800 245"/>
+  <text class="label" x="720" y="178">1 category groups many supplements</text>
+
+  <path class="relation" d="M1140 285 C1165 285 1190 285 1220 285"/>
+  <text class="label" x="1147" y="270">1 supplement receives many reviews</text>
+
+  <path class="relation" d="M1140 405 C1345 405 1425 195 1630 195"/>
+  <text class="label" x="1320" y="386">many-to-many through join table</text>
+
+  <path class="relation" d="M1930 195 C1955 195 1980 195 2010 195"/>
+  <text class="label" x="1928" y="178">many join rows point to one tag</text>
+</svg>

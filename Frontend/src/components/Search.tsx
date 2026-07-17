@@ -23,8 +23,9 @@ export default function Search() {
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        setShowDropdown(true);
+        const query = e.target.value;
+        setSearchQuery(query);
+        setShowDropdown(query.trim().length >= 2);
     };
 
     const handleBrandClick = (brand: Brand) => {

@@ -5,6 +5,9 @@ interface Review {
     rating: number;
     username: string;
     imageUrls: string[];
+    purchaseImageUrl: string;
+    supplementName: string;
+    supplementImageUrl: string;
     createdAt: string;
     helpful: number;
     variant: string;

@@ -12,6 +12,8 @@ public interface IBrandQueryService {
 
     public List<ReadBrand> getBrandByName(String name);
 
+    public List<ReadBrand> getNotApprovedBrands();
+
     public List<Brand> getAllBrands();
 
     public double averageRatingByBrandId(Long id);

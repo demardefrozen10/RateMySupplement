@@ -20,6 +20,12 @@ public class ReadReview {
 
     private List<String> imageUrls;
 
+    private String purchaseImageUrl;
+
+    private String supplementName;
+
+    private String supplementImageUrl;
+
     private LocalDateTime createdAt;
 
     private String variant;

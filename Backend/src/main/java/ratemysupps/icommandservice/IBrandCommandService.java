@@ -7,5 +7,6 @@ public interface IBrandCommandService {
 
     public ReadBrand submitBrand(WriteBrand brand);
 
+    public ReadBrand approveBrand(Long brandId);
 
 }

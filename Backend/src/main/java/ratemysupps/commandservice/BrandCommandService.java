@@ -1,6 +1,10 @@
 package ratemysupps.commandservice;
 
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import ratemysupps.entity.Brand;
 import ratemysupps.icommandservice.IBrandCommandService;
 import ratemysupps.repository.IBrandRepository;
 import ratemysupps.mapper.ReadBrandMapper;
@@ -23,5 +27,17 @@ public class BrandCommandService implements IBrandCommandService {
     @Override
     public ReadBrand submitBrand(WriteBrand brand) {
         return readMapper.fromEntity(repo.save(writeMapper.toEntity(brand)));
+    }
+
+    @Override
+    @Transactional
+    public ReadBrand approveBrand(Long brandId) {
+        Brand brand = repo.findById(brandId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Brand not found"
+        ));
+
+        brand.setVerified(true);
+        return readMapper.fromEntity(brand);
     }
 }

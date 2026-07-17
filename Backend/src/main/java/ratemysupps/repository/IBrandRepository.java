@@ -11,6 +11,8 @@ import java.util.List;
 public interface IBrandRepository extends JpaRepository<Brand, Long> {
 
     List<Brand> findByBrandNameContainingIgnoreCase(String name);
+
+    List<Brand> findByIsVerifiedFalse();
     
     @Query("SELECT COUNT(r) FROM review r WHERE r.supplement.brand.id = :brandId")
     int countReviewsByBrandId(Long brandId);

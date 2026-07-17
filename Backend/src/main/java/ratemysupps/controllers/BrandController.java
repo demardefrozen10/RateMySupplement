@@ -55,7 +55,15 @@ public class BrandController {
         return brands;
     }
 
-    
+    @GetMapping("/getNotApprovedBrands")
+    public List<ReadBrand> getNotApprovedBrands() {
+        return queryRepo.getNotApprovedBrands();
+    }
+
+    @PatchMapping("/approveBrand")
+    public ResponseEntity<ReadBrand> approveBrand(@RequestParam Long brandId) {
+        return ResponseEntity.ok(commandRepo.approveBrand(brandId));
+    }
 
     @PostMapping("/createBrand")
     public ResponseEntity<ReadBrand> createBrand(@RequestBody @Valid WriteBrand brand) {

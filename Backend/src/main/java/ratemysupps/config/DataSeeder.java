@@ -6,21 +6,26 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import ratemysupps.entity.Brand;
 import ratemysupps.entity.Category;
+import ratemysupps.entity.Review;
 import ratemysupps.entity.Supplement;
 import ratemysupps.repository.IBrandRepository;
 import ratemysupps.repository.ICategoryRepository;
+import ratemysupps.repository.IReviewRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
- * Seeds brands, categories and supplements on startup when app.seed.enabled=true.
- * Safe to re-run: existing brands, categories and supplements (matched by name) are skipped.
+ * Seeds brands, categories, supplements and sample reviews on startup when app.seed.enabled=true.
+ * Safe to re-run: existing brands, categories and supplements (matched by name) are skipped,
+ * and reviews are only added to supplements that have none.
  */
 @Component
 @ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
@@ -33,10 +38,12 @@ public class DataSeeder implements CommandLineRunner {
 
     private final IBrandRepository brandRepo;
     private final ICategoryRepository categoryRepo;
+    private final IReviewRepository reviewRepo;
 
-    public DataSeeder(IBrandRepository brandRepo, ICategoryRepository categoryRepo) {
+    public DataSeeder(IBrandRepository brandRepo, ICategoryRepository categoryRepo, IReviewRepository reviewRepo) {
         this.brandRepo = brandRepo;
         this.categoryRepo = categoryRepo;
+        this.reviewRepo = reviewRepo;
     }
 
     @Override
@@ -105,7 +112,67 @@ public class DataSeeder implements CommandLineRunner {
             brand.getSupplements().add(supplement);
         }
 
-        brandRepo.save(brand);
+        brandRepo.saveAndFlush(brand);
+        seedReviews(brand);
+    }
+
+    private void seedReviews(Brand brand) {
+        int brandTotal = 0;
+        double brandSum = 0;
+
+        for (Supplement s : brand.getSupplements()) {
+            if (reviewRepo.findBySupplementId(s.getId()).isEmpty()) {
+                List<Review> reviews = buildReviews(s);
+                reviewRepo.saveAll(reviews);
+                s.setAverageRating(reviews.stream().mapToDouble(Review::getRating).average().orElse(0));
+                s.setTotalReviews(reviews.size());
+            }
+            int count = s.getTotalReviews() == null ? 0 : s.getTotalReviews();
+            double avg = s.getAverageRating() == null ? 0 : s.getAverageRating();
+            brandTotal += count;
+            brandSum += count * avg;
+        }
+
+        if (brandTotal > 0) {
+            brand.setTotalReviews(brandTotal);
+            brand.setAverageRating(brandSum / brandTotal);
+        }
+    }
+
+    private List<Review> buildReviews(Supplement supplement) {
+        Random random = new Random(supplement.getSupplementName().hashCode());
+        List<String> variants = supplement.getVariants() == null ? List.of() : supplement.getVariants();
+
+        List<SeedReviewTemplates.Tpl> pool = new ArrayList<>(
+                SeedReviewTemplates.GENERAL.getOrDefault(supplement.getCategory().getName(), List.of()));
+        if (!variants.isEmpty()) {
+            pool.addAll(SeedReviewTemplates.FLAVOR);
+        }
+        Collections.shuffle(pool, random);
+
+        List<Review> reviews = new ArrayList<>();
+        for (SeedReviewTemplates.Tpl tpl : pool.subList(0, Math.min(10, pool.size()))) {
+            boolean usesFlavor = tpl.text().contains("{flavor}");
+            String variant = null;
+            if (!variants.isEmpty() && (usesFlavor || random.nextInt(10) < 6)) {
+                variant = variants.get(random.nextInt(variants.size()));
+            }
+
+            Review review = new Review();
+            review.setSupplement(supplement);
+            review.setRating(tpl.rating());
+            review.setComment(usesFlavor ? tpl.text().replace("{flavor}", variant) : tpl.text());
+            review.setVariant(variant);
+            // Empty username is how the frontend submits an anonymous review.
+            review.setUsername(random.nextInt(10) < 4
+                    ? ""
+                    : SeedReviewTemplates.NAMES.get(random.nextInt(SeedReviewTemplates.NAMES.size())));
+            review.setImageUrls(new ArrayList<>());
+            review.setVerified(true);
+            review.setCreatedAt(LocalDateTime.now().minusDays(1 + random.nextInt(180)).minusHours(random.nextInt(24)));
+            reviews.add(review);
+        }
+        return reviews;
     }
 
     private List<Supplement> revolutionSupplements(Map<String, Category> c) {

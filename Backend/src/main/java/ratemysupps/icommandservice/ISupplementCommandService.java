@@ -10,6 +10,8 @@ public interface ISupplementCommandService {
 
     public ReadSupplement approveSupplement(Long supplementId);
 
+    public void rejectSupplement(Long supplementId);
+
     public ReadSupplement updateSupplement(Long supplementId, UpdateSupplement update);
 
 }

@@ -41,7 +41,7 @@ export default function ApprovePage() {
     const [newServingSize, setNewServingSize] = useState("");
     const [saving, setSaving] = useState(false);
 
-    const { get, patch } = useFetch(`${API_BASE_URL}/api/`);
+    const { get, patch, del } = useFetch(`${API_BASE_URL}/api/`);
 
     useEffect(() => {
         if (!isAuthenticated) return;
@@ -109,6 +109,42 @@ export default function ApprovePage() {
 
     const handleApproveReview = (reviewId: string) => {
         patch(`review/approveReview?reviewId=${reviewId}`)
+            .then(() => {
+                setReviews(prev => prev.filter(r => r.id !== reviewId));
+            })
+            .catch(() => {
+                setError(true);
+                setTimeout(() => setError(false), 3000);
+            });
+    };
+
+    const handleRejectSupplement = (supplementId: number) => {
+        if (!window.confirm("Reject and permanently delete this supplement (and any pending reviews on it)?")) return;
+        del(`supplement/rejectSupplement?supplementId=${supplementId}`)
+            .then(() => {
+                setSupplements(prev => prev.filter(s => s.id !== supplementId));
+            })
+            .catch(() => {
+                setError(true);
+                setTimeout(() => setError(false), 3000);
+            });
+    };
+
+    const handleRejectBrand = (brandId: number) => {
+        if (!window.confirm("Reject and permanently delete this brand (and its pending supplements)?")) return;
+        del(`brand/rejectBrand?brandId=${brandId}`)
+            .then(() => {
+                setBrands(prev => prev.filter(brand => brand.id !== brandId));
+            })
+            .catch(() => {
+                setError(true);
+                setTimeout(() => setError(false), 3000);
+            });
+    };
+
+    const handleRejectReview = (reviewId: string) => {
+        if (!window.confirm("Reject and permanently delete this review?")) return;
+        del(`review/rejectReview?reviewId=${reviewId}`)
             .then(() => {
                 setReviews(prev => prev.filter(r => r.id !== reviewId));
             })
@@ -320,7 +356,10 @@ export default function ApprovePage() {
                                                 >
                                                     Approve
                                                 </button>
-                                                <button className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer">
+                                                <button
+                                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer"
+                                                    onClick={() => handleRejectBrand(brand.id)}
+                                                >
                                                     Reject
                                                 </button>
                                             </div>
@@ -372,7 +411,10 @@ export default function ApprovePage() {
                                                 >
                                                     Approve
                                                 </button>
-                                                <button className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer">
+                                                <button
+                                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer"
+                                                    onClick={() => handleRejectSupplement(supplement.id)}
+                                                >
                                                     Reject
                                                 </button>
                                             </div>
@@ -447,7 +489,10 @@ export default function ApprovePage() {
                                                 >
                                                     Approve
                                                 </button>
-                                                <button className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer">
+                                                <button
+                                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer"
+                                                    onClick={() => handleRejectReview(review.id)}
+                                                >
                                                     Reject
                                                 </button>
                                             </div>

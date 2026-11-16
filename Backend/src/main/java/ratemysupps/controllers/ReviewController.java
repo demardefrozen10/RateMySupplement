@@ -58,6 +58,12 @@ public class ReviewController {
         return ResponseEntity.ok(updated);
     }
 
+    @DeleteMapping("/rejectReview")
+    public ResponseEntity<Void> rejectReview(@RequestParam Long reviewId) {
+        commandRepo.rejectReview(reviewId);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }

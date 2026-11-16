@@ -14,6 +14,7 @@ import ratemysupps.readmodel.ReadSupplement;
 import ratemysupps.repository.ISupplementRepository;
 import ratemysupps.repository.IBrandRepository;
 import ratemysupps.repository.ICategoryRepository;
+import ratemysupps.repository.IReviewRepository;
 import ratemysupps.repository.ITagRepository;
 import ratemysupps.writemodel.UpdateSupplement;
 import ratemysupps.writemodel.WriteSupplement;
@@ -33,14 +34,16 @@ public class SupplementCommandService implements ISupplementCommandService {
     private final IBrandRepository brandRepo;
     private final ICategoryRepository categoryRepo;
     private final ITagRepository tagRepo;
+    private final IReviewRepository reviewRepo;
 
-    public SupplementCommandService(WriteSupplementMapper writeMapper, ICategoryRepository categoryRepo, ISupplementRepository suppRepo, ReadSupplementMapper readMapper, IBrandRepository brandRepo, ITagRepository tagRepo) {
+    public SupplementCommandService(WriteSupplementMapper writeMapper, ICategoryRepository categoryRepo, ISupplementRepository suppRepo, ReadSupplementMapper readMapper, IBrandRepository brandRepo, ITagRepository tagRepo, IReviewRepository reviewRepo) {
         this.writeMapper = writeMapper;
         this.suppRepo = suppRepo;
         this.readMapper = readMapper;
         this.brandRepo = brandRepo;
         this.categoryRepo = categoryRepo;
         this.tagRepo = tagRepo;
+        this.reviewRepo = reviewRepo;
     }
 
     @Override
@@ -74,6 +77,23 @@ public class SupplementCommandService implements ISupplementCommandService {
 
         supplement.setVerified(true);
         return readMapper.fromEntity(supplement);
+    }
+
+    @Override
+    @Transactional
+    public void rejectSupplement(Long supplementId) {
+        Supplement supplement = suppRepo.findById(supplementId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Supplement not found"
+        ));
+
+        if (supplement.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot reject an approved supplement");
+        }
+
+        reviewRepo.deleteAll(reviewRepo.findBySupplementId(supplementId));
+        reviewRepo.flush();
+        suppRepo.delete(supplement);
     }
 
     @Override

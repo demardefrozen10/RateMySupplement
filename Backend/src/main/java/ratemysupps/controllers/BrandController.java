@@ -65,6 +65,12 @@ public class BrandController {
         return ResponseEntity.ok(commandRepo.approveBrand(brandId));
     }
 
+    @DeleteMapping("/rejectBrand")
+    public ResponseEntity<Void> rejectBrand(@RequestParam Long brandId) {
+        commandRepo.rejectBrand(brandId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/createBrand")
     public ResponseEntity<ReadBrand> createBrand(@RequestBody @Valid WriteBrand brand) {
         ReadBrand created = commandRepo.submitBrand(brand);

@@ -113,6 +113,12 @@ public class SupplementController {
         return ResponseEntity.ok(updated);
     }
 
+    @DeleteMapping("/rejectSupplement")
+    public ResponseEntity<Void> rejectSupplement(@RequestParam Long supplementId) {
+        commandRepo.rejectSupplement(supplementId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/updateSupplement")
     public ResponseEntity<ReadSupplement> updateSupplement(
             @RequestParam Long supplementId,

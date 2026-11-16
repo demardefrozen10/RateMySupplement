@@ -8,4 +8,6 @@ public interface IReviewCommandService {
     public ReadReview submitReview(WriteReview review);
 
     public ReadReview approveReview(Long reviewId);
+
+    public void rejectReview(Long reviewId);
 }

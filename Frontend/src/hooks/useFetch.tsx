@@ -32,7 +32,10 @@ export default function useFetch(baseUrl: string) {
         return fetch(baseUrl + url, {
             method: "DELETE",
         }).then((response) => {
-            return response.json();
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            return response.status === 204 ? null : response.json();
         });
     }
 

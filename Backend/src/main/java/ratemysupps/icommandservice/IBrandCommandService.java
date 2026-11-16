@@ -9,4 +9,6 @@ public interface IBrandCommandService {
 
     public ReadBrand approveBrand(Long brandId);
 
+    public void rejectBrand(Long brandId);
+
 }

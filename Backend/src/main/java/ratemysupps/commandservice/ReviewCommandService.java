@@ -65,6 +65,22 @@ public class ReviewCommandService implements IReviewCommandService {
         return readMapper.fromEntity(review);  // No save needed
     }
 
+    @Override
+    @Transactional
+    public void rejectReview(Long reviewId) {
+        Review review = repo.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Review not found"
+                ));
+
+        if (review.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot reject an approved review");
+        }
+
+        repo.delete(review);
+    }
+
     private void updateReview(Review review, IReviewable reviewable) {
         double oldAvg = reviewable.getAverageRating();
         int oldCount = reviewable.getTotalReviews();
